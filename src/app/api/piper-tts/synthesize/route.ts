@@ -3,7 +3,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { spawn } from 'child_process'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const { text, voice, speed = 0.9, pitch = 0.9, sentencePause = 0.8 } = await request.json()
 
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     // 기도에 최적화된 텍스트 전처리
     const processedText = preprocessTextForPrayer(text, sentencePause)
 
-    return new Promise((resolve, reject) => {
+    return new Promise<NextResponse>((resolve, reject) => {
       // Piper TTS 실행
       const piperProcess = spawn(piperPath, [
         '--model', modelPath,
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         // WAV 헤더 추가 (16-bit, 22050 Hz, mono)
         const wavBuffer = addWavHeader(audioBuffer, 22050, 1, 16)
 
-        resolve(new NextResponse(wavBuffer, {
+        resolve(new NextResponse(new Uint8Array(wavBuffer), {
           headers: {
             'Content-Type': 'audio/wav',
             'Content-Length': wavBuffer.length.toString(),

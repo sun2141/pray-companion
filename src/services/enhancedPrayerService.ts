@@ -623,10 +623,10 @@ ${learningData.avoidPatterns.slice(0, 3).map(pattern => `- ${pattern}`).join('\n
     const sadnessKeywords = ['슬픈', '힘든', '어려운', '괴로운', '고통', '아픈']
     
     let mainTopic = '일반'
-    let subTopics: string[] = []
+    const subTopics: string[] = []
     let emotionalContext = '평온'
     let urgencyLevel = '보통'
-    let specificConcerns: string[] = []
+    const specificConcerns: string[] = []
 
     // 주제 결정
     if (healthKeywords.some(keyword => combinedText.includes(keyword))) {

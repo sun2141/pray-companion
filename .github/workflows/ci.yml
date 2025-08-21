@@ -65,12 +65,12 @@ jobs:
         run: npm ci
 
       - name: Run security audit
-        run: npm audit --audit-level moderate
+        run: npm audit --audit-level high
 
       - name: Check for vulnerable dependencies
         run: |
           echo "Checking for known vulnerabilities..."
-          npx audit-ci --moderate
+          npx audit-ci --high
 
   deploy-preview:
     name: Deploy Preview

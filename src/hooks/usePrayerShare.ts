@@ -45,7 +45,7 @@ export const usePrayerShare = () => {
       }
 
       const canvas = await html2canvas(element, {
-        backgroundColor: null,
+        background: null,
         scale: 2, // 고해상도
         useCORS: true,
         allowTaint: true,
@@ -55,7 +55,7 @@ export const usePrayerShare = () => {
         // 추가 옵션으로 안정성 개선
         foreignObjectRendering: true,
         removeContainer: true
-      })
+      } as any)
 
       // 캔버스 크기 확인
       if (canvas.width === 0 || canvas.height === 0) {
@@ -160,7 +160,7 @@ export const usePrayerShare = () => {
 
   // 카카오톡 공유
   const shareKakao = useCallback(async (options: ShareOptions): Promise<boolean> => {
-    if (typeof window === 'undefined' || !window.Kakao) {
+    if (typeof window === 'undefined' || !(window as any).Kakao) {
       setError('카카오톡 공유 기능을 초기화할 수 없습니다.')
       return false
     }
@@ -172,7 +172,7 @@ export const usePrayerShare = () => {
     }
 
     try {
-      window.Kakao.Share.sendDefault({
+      (window as any).Kakao.Share.sendDefault({
         objectType: 'feed',
         content: {
           title: `기도문: ${options.title}`,

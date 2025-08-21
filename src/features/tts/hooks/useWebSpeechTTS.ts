@@ -171,7 +171,6 @@ export const useWebSpeechTTS = () => {
             errorMessage = '음성 재생이 중단되었습니다.'
             break
           case '':
-          case 'unknown':
           default:
             // 사용 가능한 음성이 없는 경우
             if (availableVoices.length === 0) {
