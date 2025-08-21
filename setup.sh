@@ -93,15 +93,15 @@ setup_env() {
 # DO NOT commit this file to version control
 
 # Supabase configuration (필수)
-NEXT_PUBLIC_SUPABASE_URL=https://aaziehufvqureeixrxag.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhemllaHVmdnF1cmVlaXhyeGFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxMjY0NTAsImV4cCI6MjA3MDcwMjQ1MH0.FRWMBcLjJpV2WfNtxVjx9-fDQVKCOVGi5v6M2lpCsPk
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhemllaHVmdnF1cmVlaXhyeGFnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTEyNjQ1MCwiZXhwIjoyMDcwNzAyNDUwfQ.Cnj-lezn5iY-tFPsOsZaJeuIHvsn-qDe_qvFbanmfL8
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url-here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key-here
 
 # OpenAI API for prayer generation (선택사항)
 OPENAI_API_KEY=your-openai-api-key-here
 
 # Google Cloud TTS API (선택사항)
-GOOGLE_CLOUD_API_KEY=AIzaSyDLMzUnvPrKhDHEjJAG85sKlXivNLzm7zI
+GOOGLE_CLOUD_API_KEY=your-google-cloud-api-key-here
 
 # Azure Speech Services (선택사항)
 AZURE_SPEECH_KEY=your-azure-speech-key-here
