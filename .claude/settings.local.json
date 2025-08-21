@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "mcp__vooster-ai__update_task_status",
+      "mcp__vooster-ai__get_next_task",
+      "Bash(npm install:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(curl:*)"
+    ],
+    "deny": []
+  }
+}

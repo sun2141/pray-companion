@@ -1,168 +1,275 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Github, Copy, Sparkles } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-
-const PACKAGE_NAME = '@easynext/cli';
-const CURRENT_VERSION = 'v0.1.35';
-
-function latestVersion(packageName: string) {
-  return axios
-    .get('https://registry.npmjs.org/' + packageName + '/latest')
-    .then((res) => res.data.version);
-}
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Heart, Users, LogOut, UserPlus, LogIn } from 'lucide-react';
+import { useAuthContext } from '@/components/AuthProvider';
+import { AuthModal } from '@/features/auth/components/AuthModal';
+import { PrayerForm } from '@/features/prayer/components/PrayerForm';
+import { TTSPlayer } from '@/features/tts/components/TTSPlayer';
+import { APP_CONFIG } from '@/constants';
 
 export default function Home() {
-  const { toast } = useToast();
-  const [latest, setLatest] = useState<string | null>(null);
+  const { user, loading, isAuthenticated, signOut } = useAuthContext();
+  const [showAuth, setShowAuth] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [generatedPrayer, setGeneratedPrayer] = useState<{
+    title: string;
+    content: string;
+  } | null>(null);
 
-  useEffect(() => {
-    const fetchLatestVersion = async () => {
-      try {
-        const version = await latestVersion(PACKAGE_NAME);
-        setLatest(`v${version}`);
-      } catch (error) {
-        console.error('Failed to fetch version info:', error);
-      }
-    };
-    fetchLatestVersion();
-  }, []);
-
-  const handleCopyCommand = () => {
-    navigator.clipboard.writeText(`npm install -g ${PACKAGE_NAME}@latest`);
-    toast({
-      description: 'Update command copied to clipboard',
-    });
-  };
-
-  const needsUpdate = latest && latest !== CURRENT_VERSION;
-
-  return (
-    <div className="flex min-h-screen relative overflow-hidden">
-      {/* Main Content */}
-      <div className="min-h-screen flex bg-gray-100">
-        <div className="flex flex-col p-5 md:p-8 space-y-4">
-          <h1 className="text-3xl md:text-5xl font-semibold tracking-tighter !leading-tight text-left">
-            Easiest way to start
-            <br /> Next.js project
-            <br /> with Cursor
-          </h1>
-
-          <p className="text-lg text-muted-foreground">
-            Get Pro-created Next.js bootstrap just in seconds
-          </p>
-
-          <div className="flex items-center gap-2">
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="gap-2 w-fit rounded-full px-4 py-2 border border-black"
-            >
-              <a href="https://github.com/easynextjs/easynext" target="_blank">
-                <Github className="w-4 h-4" />
-                GitHub
-              </a>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="gap-2 w-fit rounded-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white"
-            >
-              <a href="https://easynext.org/premium" target="_blank">
-                <Sparkles className="w-4 h-4" />
-                Premium
-              </a>
-            </Button>
-          </div>
-          <Section />
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
         </div>
       </div>
+    );
+  }
 
-      <div className="min-h-screen ml-16 flex-1 flex flex-col items-center justify-center space-y-4">
-        <div className="flex flex-col items-center space-y-2">
-          <p className="text-muted-foreground">
-            Current Version: {CURRENT_VERSION}
-          </p>
-          <p className="text-muted-foreground">
-            Latest Version:{' '}
-            <span className="font-bold">{latest || 'Loading...'}</span>
-          </p>
+  if (showAuth) {
+    return (
+      <AuthModal
+        initialMode={authMode}
+        onSuccess={() => setShowAuth(false)}
+      />
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-rose-50">
+      {/* Header */}
+      <header className="border-b border-orange-100/50 bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-rose-400 rounded-full flex items-center justify-center shadow-lg">
+              <Heart className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-orange-600 to-rose-600 bg-clip-text text-transparent">
+              {APP_CONFIG.name}
+            </h1>
+          </div>
+          
+          <div className="flex items-center space-x-2 md:space-x-3">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <span className="hidden md:block text-sm text-orange-700/80">
+                  안녕하세요, {user?.email?.split('@')[0]}님
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={signOut}
+                  className="border-orange-200 text-orange-700 hover:bg-orange-50 flex items-center space-x-1"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">로그아웃</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-1 md:space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setShowAuth(true);
+                  }}
+                  className="border-orange-200 text-orange-700 hover:bg-orange-50 flex items-center space-x-1"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">로그인</span>
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setAuthMode('signup');
+                    setShowAuth(true);
+                  }}
+                  className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white border-0 shadow-md flex items-center space-x-1"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">가입</span>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
+      </header>
 
-        {needsUpdate && (
-          <div className="flex flex-col items-center space-y-2">
-            <p className="text-yellow-600">New version available!</p>
-            <p className="text-sm text-muted-foreground">
-              Copy and run the command below to update:
-            </p>
-            <div className="relative group">
-              <pre className="bg-gray-100 p-4 rounded-lg">
-                npm install -g {PACKAGE_NAME}@latest
-              </pre>
-              <button
-                onClick={handleCopyCommand}
-                className="absolute top-2 right-2 p-2 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6 md:py-8">
+        {!isAuthenticated ? (
+          // Welcome Section for Non-authenticated Users
+          <div className="text-center mb-8 md:mb-12">
+            <div className="max-w-4xl mx-auto">
+              {/* Hero Section */}
+              <div className="mb-8 md:mb-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-orange-400 to-rose-400 rounded-full shadow-lg mb-6">
+                  <Heart className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                </div>
+                <h2 className="text-3xl md:text-5xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-orange-600 via-rose-600 to-pink-600 bg-clip-text text-transparent">
+                    AI와 함께하는
+                  </span>
+                  <br />
+                  <span className="text-gray-800">동행 기도</span>
+                </h2>
+                <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
+                  혼자 기도하는 외로움을 해소하고<br className="md:hidden" />
+                  AI가 마음에 맞는 기도문을 함께 만들어요 🙏
+                </p>
+              </div>
+              
+              {/* Feature Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-rose-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-gray-800 mb-3">맞춤형 기도문</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      상황과 마음에 맞는<br />
+                      기승전결이 있는 자연스러운 기도문
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-rose-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-gray-800 mb-3">동행 기도</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      실시간으로 함께 기도하는<br />
+                      사람들과 동행감을 느껴보세요
+                    </p>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                      <Heart className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-gray-800 mb-3">쉬운 공유</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      아름다운 기도문 카드로<br />
+                      가족, 친구들과 함께 나눠요
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* CTA Button */}
+              <div className="space-y-4">
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    setAuthMode('signup');
+                    setShowAuth(true);
+                  }}
+                  className="bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                >
+                  🙏 지금 시작하기
+                </Button>
+                <p className="text-sm text-gray-500">
+                  무료로 시작 • 언제든 편안하게
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Main App for Authenticated Users
+          <div className="max-w-6xl mx-auto space-y-6 md:space-y-8">
+            {/* Welcome Header */}
+            <div className="text-center mb-6 md:mb-8">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-orange-400 to-rose-400 rounded-full shadow-lg mb-4">
+                <Heart className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">
+                <span className="bg-gradient-to-r from-orange-600 to-rose-600 bg-clip-text text-transparent">
+                  오늘도 함께 기도해요
+                </span>
+              </h2>
+              <p className="text-gray-600 text-sm md:text-base">
+                마음을 나누고 AI와 함께 의미있는 기도 시간을 가져보세요 ✨
+              </p>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              {/* Prayer Generation Section */}
+              <div className="order-1">
+                <PrayerForm onPrayerGenerated={setGeneratedPrayer} />
+              </div>
+
+              {/* TTS Section */}
+              <div className="order-2 lg:order-2">
+                {generatedPrayer ? (
+                  <TTSPlayer
+                    text={generatedPrayer.content}
+                    title={generatedPrayer.title}
+                  />
+                ) : (
+                  <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm h-full">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-gray-800 flex items-center space-x-2">
+                        <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-rose-400 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs">🎵</span>
+                        </div>
+                        <span>음성 낭독</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex items-center justify-center min-h-[200px]">
+                      <div className="text-center space-y-4">
+                        <div className="w-16 h-16 bg-gradient-to-r from-orange-100 to-rose-100 rounded-full flex items-center justify-center mx-auto">
+                          <Heart className="w-8 h-8 text-orange-400" />
+                        </div>
+                        <div>
+                          <p className="text-gray-600 text-sm leading-relaxed">
+                            먼저 기도문을 생성해주세요
+                          </p>
+                          <p className="text-gray-500 text-xs mt-2">
+                            AI가 생성한 기도문을 따뜻한 음성으로 들을 수 있습니다
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </div>
         )}
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-orange-100/50 bg-gradient-to-r from-orange-50/50 to-rose-50/50 mt-8 md:mt-16">
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="text-center space-y-3">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-rose-400 rounded-full flex items-center justify-center">
+                <Heart className="w-3 h-3 text-white" />
+              </div>
+              <span className="text-sm font-medium bg-gradient-to-r from-orange-600 to-rose-600 bg-clip-text text-transparent">
+                {APP_CONFIG.name}
+              </span>
+            </div>
+            <p className="text-xs md:text-sm text-gray-600">
+              AI 기반 동행 기도 서비스 • 혼자가 아닌 함께하는 기도 🙏
+            </p>
+            <p className="text-xs text-gray-500">
+              © 2024 {APP_CONFIG.name}. Made with ❤️ for peaceful prayers.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
-  );
-}
-
-function Section() {
-  const items = [
-    { href: 'https://nextjs.org/', label: 'Next.js' },
-    { href: 'https://ui.shadcn.com/', label: 'shadcn/ui' },
-    { href: 'https://tailwindcss.com/', label: 'Tailwind CSS' },
-    { href: 'https://www.framer.com/motion/', label: 'framer-motion' },
-    { href: 'https://zod.dev/', label: 'zod' },
-    { href: 'https://date-fns.org/', label: 'date-fns' },
-    { href: 'https://ts-pattern.dev/', label: 'ts-pattern' },
-    { href: 'https://es-toolkit.dev/', label: 'es-toolkit' },
-    { href: 'https://zustand.docs.pmnd.rs/', label: 'zustand' },
-    { href: 'https://supabase.com/', label: 'supabase' },
-    { href: 'https://react-hook-form.com/', label: 'react-hook-form' },
-  ];
-
-  return (
-    <div className="flex flex-col py-5 md:py-8 space-y-2 opacity-75">
-      <p className="font-semibold">What&apos;s Included</p>
-
-      <div className="flex flex-col space-y-1 text-muted-foreground">
-        {items.map((item) => (
-          <SectionItem key={item.href} href={item.href}>
-            {item.label}
-          </SectionItem>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SectionItem({
-  children,
-  href,
-}: {
-  children: React.ReactNode;
-  href: string;
-}) {
-  return (
-    <a
-      href={href}
-      className="flex items-center gap-2 underline"
-      target="_blank"
-    >
-      <CheckCircle className="w-4 h-4" />
-      <p>{children}</p>
-    </a>
   );
 }
