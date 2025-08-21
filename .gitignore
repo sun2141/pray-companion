@@ -36,6 +36,11 @@ yarn-error.log*
 !.env.local.example
 !.env.production.example
 
+# Personal development environment (NEVER commit)
+.env.local.personal
+.env.personal
+.env.dev.personal
+
 # vercel
 .vercel
 
